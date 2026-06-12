@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stack Internal — Coming Soon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0C0D0F;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,94,0,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,94,0,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow {
+      position: fixed;
+      top: -80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 300px;
+      background: radial-gradient(ellipse at center, rgba(255,94,0,0.15) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #FF5E00;
+      margin-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #fff;
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 em {
+      font-style: normal;
+      color: #FF5E00;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: rgba(255,255,255,0.45);
+      text-align: center;
+      margin-bottom: 3rem;
+      font-weight: 400;
+    }
+
+    .subtitle code {
+      font-family: 'Courier New', monospace;
+      color: #FF5E00;
+      background: rgba(255,94,0,0.1);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .countdown-grid {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(255,255,255,0.04);
+      border: 0.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px 28px 16px;
+      min-width: 90px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .unit::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,94,0,0.5), transparent);
+    }
+
+    .unit-num {
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 6px;
+      transition: color 0.2s;
+    }
+
+    .unit-num.tick {
+      color: #FF5E00;
+    }
+
+    .unit-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .sep {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-bottom: 20px;
+      color: rgba(255,255,255,0.2);
+      font-size: 28px;
+      font-weight: 300;
+      align-self: center;
+    }
+
+    @media (max-width: 480px) {
+      .sep { display: none; }
+      .unit { min-width: 70px; padding: 16px 18px 12px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+  <div class="glow"></div>
+
+  <div class="content">
+    <p class="eyebrow">Coming soon</p>
+    <h1>Stack <em>Internal</em> is launching</h1>
+    <p class="subtitle">Finally, a place to put all that knowledge that isn't <code>// TODO: document this</code></p>
+
+    <div class="countdown-grid">
+      <div class="unit"><span class="unit-num" id="days">--</span><span class="unit-label">Days</span></div>
+      <div class="sep">:</div>
+      <div class="unit"><span class="unit-num" id="hours">--</span><span class="unit-label">Hours</span></div>
+      <div class="sep">:</div>
+      <div class="unit"><span class="unit-num" id="minutes">--</span><span class="unit-label">Minutes</span></div>
+      <div class="sep">:</div>
+      <div class="unit"><span class="unit-num" id="seconds">--</span><span class="unit-label">Seconds</span></div>
+    </div>
+  </div>
+
+  <script>
+    const target = new Date('2026-07-31T00:00:00');
+    function pad(n) { return String(n).padStart(2, '0'); }
+    let prev = { d: -1, h: -1, m: -1, s: -1 };
+
+    function flash(el, val, key) {
+      el.textContent = pad(val);
+      if (val !== prev[key]) {
+        el.classList.add('tick');
+        setTimeout(() => el.classList.remove('tick'), 300);
+      }
+      prev[key] = val;
+    }
+
+    function tick() {
+      const diff = target - new Date();
+      if (diff <= 0) {
+        document.querySelector('.countdown-grid').innerHTML = '<p style="font-size:22px;font-weight:700;color:#FF5E00;">Stack Internal has launched!</p>';
+        return;
+      }
+      const t = Math.floor(diff / 1000);
+      flash(document.getElementById('days'),    Math.floor(t / 86400),         'd');
+      flash(document.getElementById('hours'),   Math.floor((t % 86400) / 3600),'h');
+      flash(document.getElementById('minutes'), Math.floor((t % 3600) / 60),   'm');
+      flash(document.getElementById('seconds'), t % 60,                         's');
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>
